@@ -56,6 +56,8 @@ post '/sms' do
     # unlock
     if (sender == locked_by) && (lockphrase == locked_with)
       puts "Unlocking..."
+      $redis.del('locked_by')
+      $redis.del('locked_with')
       Typhoeus.get(lock_toggle_url)
       send_sms(to: sender, message: 'Unlocked!')
     else
@@ -67,7 +69,7 @@ post '/sms' do
     $redis.set('locked_with', lockphrase)
     puts "Locking..."
     Typhoeus.get(lock_toggle_url)
-    send_sms(to: sender, message: "Locked with passphrase '#{locked_with}'. Text the same phrase again from the same phone to unlock.")
+    send_sms(to: sender, message: "Locked with passphrase '#{lockphrase}'. Text the same phrase again from the same phone to unlock.")
   end
 end
 
